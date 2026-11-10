@@ -19,10 +19,15 @@ export function PracticeExam() {
   const [entered, setEntered] = useState(false);
   const [reviewing, setReviewing] = useState(false);
 
-  function start(mode: PracticeMode, limitMinutes: number | null) {
+  function start(
+    setId: string,
+    mode: PracticeMode,
+    limitMinutes: number | null,
+  ) {
     setReviewing(false);
     setEntered(true);
     setStoredSession({
+      setId,
       mode,
       answers: {},
       flagged: [],

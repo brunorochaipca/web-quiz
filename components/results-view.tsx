@@ -19,6 +19,7 @@ import {
   formatQuestionNumber,
   formatValores,
 } from "@/lib/exam-data";
+import { getExamSet } from "@/lib/exam-sets";
 import { gradeSession, type Grade, type Session } from "@/lib/session";
 
 export function ResultsView({
@@ -30,7 +31,8 @@ export function ResultsView({
   onReview: (questionId: number) => void;
   onRestart: () => void;
 }) {
-  const grade = gradeSession(session.answers);
+  const grade = gradeSession(session);
+  const set = getExamSet(session.setId);
   const [restartOpen, setRestartOpen] = useState(false);
   const [filter, setFilter] = useState<"todas" | "erradas" | "certas">("todas");
   const elapsed = (session.submittedAt ?? session.startedAt) - session.startedAt;
@@ -50,7 +52,7 @@ export function ResultsView({
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-12">
       <p className="text-[11px] font-medium tracking-[0.2em] text-muted-foreground uppercase">
-        Correção · modo {session.mode}
+        Correção · {set.title} · modo {session.mode}
       </p>
       <div className="mt-3 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -73,10 +75,10 @@ export function ResultsView({
         </div>
         <div className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
           <p className="font-heading text-6xl leading-none tabular-nums">
-            {formatValores(grade.points)}
+            {formatValores(grade.points, grade.maxPoints)}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            valores · {grade.points} de {grade.maxPoints} pontos
+            valores (em 20) · {grade.points} de {grade.maxPoints} pontos
           </p>
         </div>
       </div>

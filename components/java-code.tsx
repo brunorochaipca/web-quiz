@@ -6,6 +6,7 @@ const KEYWORDS = new Set([
   "String",
   "void",
   "class",
+  "final",
   "if",
   "else",
   "switch",

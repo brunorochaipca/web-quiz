@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { BookOpen, Clock3, PenLine } from "lucide-react";
+import { cn } from "cn";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { TOTAL_POINTS, TOTAL_QUESTIONS } from "@/lib/exam-data";
+import {
+  DEFAULT_SET_ID,
+  EXAM_SETS,
+  getExamSet,
+  type ExamSet,
+} from "@/lib/exam-sets";
 import {
   answeredCount,
   type PracticeMode,
@@ -29,19 +35,27 @@ export function IntroView({
   onResume,
 }: {
   saved: Session | null;
-  onStart: (mode: PracticeMode, limitMinutes: number | null) => void;
+  onStart: (
+    setId: string,
+    mode: PracticeMode,
+    limitMinutes: number | null,
+  ) => void;
   onResume: () => void;
 }) {
   const [limit, setLimit] = useState<number | null>(null);
+  const [setId, setSetId] = useState(DEFAULT_SET_ID);
   const [pendingMode, setPendingMode] = useState<PracticeMode | null>(null);
   const savedAnswers = saved ? answeredCount(saved) : 0;
+  const savedSet = saved ? getExamSet(saved.setId) : null;
+  const set = getExamSet(setId);
+  const totalQuestions = set.questions.length;
 
   function requestStart(mode: PracticeMode) {
     if (saved) {
       setPendingMode(mode);
       return;
     }
-    onStart(mode, limit);
+    onStart(setId, mode, limit);
   }
 
   return (
@@ -51,18 +65,40 @@ export function IntroView({
           Algoritmia e Programação · Java
         </p>
         <h1 className="mt-3 font-heading text-4xl leading-[1.05] text-balance sm:text-6xl">
-          Teste modelo teórico-prático
+          Teste modelo e treino de Java
         </h1>
         <p className="mt-4 max-w-2xl text-lg leading-7 text-foreground/80">
-          Trinta e uma questões de escolha múltipla para treinares antes do
-          teste de 11 de novembro de 2026. Há uma única resposta correta em
-          cada questão.
+          Questões de escolha múltipla para treinares antes do teste de 11 de
+          novembro de 2026. Há uma única resposta correta em cada questão.
         </p>
       </header>
 
-      <dl className="mt-8 grid grid-cols-3 gap-2 sm:max-w-xl sm:gap-3">
-        <Stat value={String(TOTAL_QUESTIONS)} label="questões" />
-        <Stat value={String(TOTAL_POINTS)} label="pontos" />
+      <section className="mt-8" aria-labelledby="set-heading">
+        <h2 id="set-heading" className="font-heading text-2xl">
+          Escolhe o conjunto
+        </h2>
+        <div
+          role="radiogroup"
+          aria-labelledby="set-heading"
+          className="mt-3 grid gap-3 sm:grid-cols-3"
+        >
+          {EXAM_SETS.map((option) => (
+            <SetCard
+              key={option.id}
+              set={option}
+              selected={option.id === setId}
+              onSelect={() => setSetId(option.id)}
+            />
+          ))}
+        </div>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+          {set.description}
+        </p>
+      </section>
+
+      <dl className="mt-6 grid grid-cols-3 gap-2 sm:max-w-xl sm:gap-3">
+        <Stat value={String(totalQuestions)} label="questões" />
+        <Stat value={String(set.totalPoints)} label="pontos" />
         <Stat value="20" label="valores" />
       </dl>
 
@@ -76,8 +112,8 @@ export function IntroView({
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
               {saved.submittedAt
-                ? `Modo ${saved.mode}. A nota e as resoluções continuam guardadas.`
-                : `${savedAnswers} de ${TOTAL_QUESTIONS} respostas no modo ${saved.mode}.`}
+                ? `${savedSet?.title}, modo ${saved.mode}. A nota e as resoluções continuam guardadas.`
+                : `${savedSet?.title}: ${savedAnswers} de ${savedSet?.questions.length} respostas no modo ${saved.mode}.`}
             </p>
           </div>
           <Button type="button" size="lg" className="h-10 px-4" onClick={onResume}>
@@ -90,7 +126,7 @@ export function IntroView({
         <ModeCard
           icon={<PenLine className="size-4" />}
           title="Modo exame"
-          body="Respondes às 31 questões sem veres a correção. No fim recebes a nota, a grelha e a resolução de cada pergunta."
+          body={`Respondes às ${totalQuestions} questões sem veres a correção. No fim recebes a nota, a grelha e a resolução de cada pergunta.`}
           action="Começar em modo exame"
           onClick={() => requestStart("exame")}
         />
@@ -109,7 +145,7 @@ export function IntroView({
           Tempo de prática
         </div>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          O modelo não indica duração. O cronómetro conta sempre o tempo
+          O teste modelo não indica duração. O cronómetro conta sempre o tempo
           decorrido. Podes acrescentar um limite só como referência: ao
           esgotar, o teste não é entregue sozinho.
         </p>
@@ -189,7 +225,7 @@ export function IntroView({
               type="button"
               onClick={() => {
                 if (pendingMode) {
-                  onStart(pendingMode, limit);
+                  onStart(setId, pendingMode, limit);
                 }
                 setPendingMode(null);
               }}
@@ -200,6 +236,38 @@ export function IntroView({
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function SetCard({
+  set,
+  selected,
+  onSelect,
+}: {
+  set: ExamSet;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={cn(
+        "rounded-2xl border px-4 py-3 text-left transition-colors",
+        selected
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border bg-card hover:border-foreground/25",
+      )}
+    >
+      <span className="block font-heading text-xl leading-tight">
+        {set.title}
+      </span>
+      <span className="mt-1 block text-xs text-muted-foreground tabular-nums">
+        {set.questions.length} questões · {set.totalPoints} pontos
+      </span>
+    </button>
   );
 }
 

@@ -1,15 +1,14 @@
+import { SECTIONS, type Choice, type Question } from "@/lib/exam-data";
 import {
-  QUESTIONS,
-  SECTIONS,
-  TOTAL_POINTS,
+  findExamSet,
+  getExamSet,
   questionsInSection,
-  type Choice,
-  type Question,
-} from "@/lib/exam-data";
+} from "@/lib/exam-sets";
 
 export type PracticeMode = "exame" | "estudo";
 
 export type Session = {
+  setId: string;
   mode: PracticeMode;
   answers: Partial<Record<number, Choice>>;
   flagged: number[];
@@ -45,26 +44,33 @@ export function loadSession(): Session | null {
       return null;
     }
 
+    // Sessões guardadas antes de existirem vários conjuntos são do teste modelo.
+    const setId = typeof data.setId === "string" ? data.setId : "modelo";
+    const set = findExamSet(setId);
+    if (!set) {
+      return null;
+    }
+    const total = set.questions.length;
+    const validId = (id: unknown): id is number =>
+      typeof id === "number" && Number.isInteger(id) && id >= 1 && id <= total;
+
     const answers: Session["answers"] = {};
     if (data.answers && typeof data.answers === "object") {
       for (const [key, value] of Object.entries(data.answers)) {
         const id = Number(key);
-        if (Number.isInteger(id) && isChoice(value)) {
+        if (validId(id) && isChoice(value)) {
           answers[id] = value;
         }
       }
     }
 
     return {
+      setId: set.id,
       mode: data.mode,
       answers,
-      flagged: Array.isArray(data.flagged)
-        ? data.flagged.filter((id) => Number.isInteger(id))
-        : [],
-      revealed: Array.isArray(data.revealed)
-        ? data.revealed.filter((id) => Number.isInteger(id))
-        : [],
-      currentId: Math.min(31, Math.max(1, data.currentId)),
+      flagged: Array.isArray(data.flagged) ? data.flagged.filter(validId) : [],
+      revealed: Array.isArray(data.revealed) ? data.revealed.filter(validId) : [],
+      currentId: Math.min(total, Math.max(1, data.currentId)),
       startedAt: data.startedAt,
       submittedAt: typeof data.submittedAt === "number" ? data.submittedAt : null,
       limitMinutes:
@@ -114,8 +120,11 @@ export type Grade = {
   perQuestion: GradedQuestion[];
 };
 
-export function gradeSession(answers: Session["answers"]): Grade {
-  const perQuestion: GradedQuestion[] = QUESTIONS.map((question) => {
+export function gradeSession(session: Pick<Session, "setId" | "answers">): Grade {
+  const set = getExamSet(session.setId);
+  const { answers } = session;
+
+  const perQuestion: GradedQuestion[] = set.questions.map((question) => {
     const chosen = answers[question.id] ?? null;
     return {
       question,
@@ -126,7 +135,7 @@ export function gradeSession(answers: Session["answers"]): Grade {
   });
 
   const bySection: SectionScore[] = SECTIONS.map((section) => {
-    const items = questionsInSection(section.id).map((question) => {
+    const items = questionsInSection(set, section.id).map((question) => {
       const graded = perQuestion.find((item) => item.question.id === question.id);
       if (!graded) {
         throw new Error(`Falta a correção da questão ${question.id}.`);
@@ -146,7 +155,7 @@ export function gradeSession(answers: Session["answers"]): Grade {
       total: items.length,
       answered: items.filter((item) => !item.blank).length,
     };
-  });
+  }).filter((section) => section.total > 0);
 
   const correctCount = perQuestion.filter((item) => item.correct).length;
   const blankCount = perQuestion.filter((item) => item.blank).length;
@@ -156,7 +165,7 @@ export function gradeSession(answers: Session["answers"]): Grade {
       (sum, item) => sum + (item.correct ? item.question.points : 0),
       0,
     ),
-    maxPoints: TOTAL_POINTS,
+    maxPoints: set.totalPoints,
     correctCount,
     wrongCount: perQuestion.length - correctCount - blankCount,
     blankCount,

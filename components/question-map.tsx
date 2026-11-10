@@ -3,11 +3,8 @@
 import { cn } from "cn";
 import { Flag } from "lucide-react";
 
-import {
-  SECTIONS,
-  formatQuestionNumber,
-  questionsInSection,
-} from "@/lib/exam-data";
+import { SECTIONS, formatQuestionNumber } from "@/lib/exam-data";
+import { getExamSet, questionsInSection } from "@/lib/exam-sets";
 import type { Grade, Session } from "@/lib/session";
 
 export function QuestionMap({
@@ -23,6 +20,8 @@ export function QuestionMap({
   onNavigate: (id: number) => void;
   idPrefix?: string;
 }) {
+  const set = getExamSet(session.setId);
+
   return (
     <div className="flex flex-col gap-4">
       {SECTIONS.map((section) => (
@@ -31,7 +30,7 @@ export function QuestionMap({
             {section.title}
           </p>
           <div className="mt-1.5 grid grid-cols-4 gap-1.5">
-            {questionsInSection(section.id).map((question) => {
+            {questionsInSection(set, section.id).map((question) => {
               const chosen = session.answers[question.id];
               const flagged = session.flagged.includes(question.id);
               const current = session.currentId === question.id;

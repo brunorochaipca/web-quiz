@@ -21,11 +21,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   formatDuration,
   formatQuestionNumber,
-  questionById,
   sectionById,
-  TOTAL_QUESTIONS,
   type Choice,
 } from "@/lib/exam-data";
+import { getExamSet, questionById } from "@/lib/exam-sets";
 import { answeredCount, gradeSession, type Session } from "@/lib/session";
 
 export function ExamView({
@@ -55,7 +54,9 @@ export function ExamView({
   const [abandonOpen, setAbandonOpen] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  const question = questionById(session.currentId);
+  const set = getExamSet(session.setId);
+  const totalQuestions = set.questions.length;
+  const question = questionById(set, session.currentId);
   const section = sectionById(question.sectionId);
   const chosen = session.answers[question.id] ?? null;
   const revealed =
@@ -63,10 +64,10 @@ export function ExamView({
     (session.mode === "estudo" && session.revealed.includes(question.id));
   const locked = review || revealed;
   const mapGrade =
-    review || session.mode === "estudo" ? gradeSession(session.answers) : null;
+    review || session.mode === "estudo" ? gradeSession(session) : null;
   const isCorrect = chosen === question.answer;
   const answered = answeredCount(session);
-  const blank = TOTAL_QUESTIONS - answered;
+  const blank = totalQuestions - answered;
   const flagged = session.flagged.includes(question.id);
   const elapsedEnd = session.submittedAt ?? now;
   const elapsed = elapsedEnd - session.startedAt;
@@ -125,7 +126,7 @@ export function ExamView({
 
   function go(offset: number) {
     const next = question.id + offset;
-    if (next >= 1 && next <= TOTAL_QUESTIONS) {
+    if (next >= 1 && next <= totalQuestions) {
       onNavigate(next);
     }
   }
@@ -139,7 +140,7 @@ export function ExamView({
               Algoritmia e Programação
             </p>
             <p className="truncate font-heading text-lg leading-tight sm:text-xl">
-              {review ? "Revisão" : "Teste modelo"}
+              {review ? "Revisão" : set.title}
               <span className="text-muted-foreground">
                 {" "}
                 · modo {session.mode}
@@ -148,7 +149,7 @@ export function ExamView({
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1 text-right">
             <p className="text-sm tabular-nums">
-              {answered} de {TOTAL_QUESTIONS}
+              {answered} de {totalQuestions}
             </p>
             <p
               className={cn(
@@ -375,7 +376,7 @@ export function ExamView({
                   type="button"
                   variant="outline"
                   onClick={() => go(1)}
-                  disabled={question.id === TOTAL_QUESTIONS}
+                  disabled={question.id === totalQuestions}
                 >
                   Seguinte
                   <ChevronRight />
@@ -414,7 +415,7 @@ export function ExamView({
           <DialogHeader>
             <DialogTitle>Grelha de respostas</DialogTitle>
             <DialogDescription>
-              {answered} de {TOTAL_QUESTIONS} questões com resposta.
+              {answered} de {totalQuestions} questões com resposta.
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto pr-1">
@@ -439,7 +440,7 @@ export function ExamView({
             <DialogDescription>
               {blank > 0
                 ? `Ficam ${blank} ${blank === 1 ? "questão" : "questões"} por responder. Em branco contam zero pontos.`
-                : "As 31 questões têm resposta. A correção fica disponível a seguir."}
+                : `As ${totalQuestions} questões têm resposta. A correção fica disponível a seguir.`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

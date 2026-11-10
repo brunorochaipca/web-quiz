@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8" />
+<title>Folha de consulta · Java</title>
+<style>
+  @page { size: A4; margin: 9mm 8mm 11mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Calibri, sans-serif;
+    font-size: 8.6pt;
+    line-height: 1.32;
+    color: #1c1915;
+    background: white;
+  }
+  header {
+    border-bottom: 2px solid #1e3a5f;
+    padding-bottom: 2.5mm;
+    margin-bottom: 3mm;
+  }
+  header p { margin: 0; }
+  .kicker {
+    font-size: 7.4pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5c564c;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 16pt;
+    font-weight: normal;
+    line-height: 1.05;
+    margin: 0.6mm 0 0.8mm;
+  }
+  .sub { font-size: 8pt; color: #3f3a33; }
+  main { column-count: 2; column-gap: 5.5mm; }
+  h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11pt;
+    font-weight: normal;
+    margin: 0 0 1.2mm;
+    color: #1e3a5f;
+    break-after: avoid;
+  }
+  h3 {
+    font-size: 8.2pt;
+    margin: 1.6mm 0 0.6mm;
+    break-after: avoid;
+  }
+  p { margin: 0 0 1.2mm; }
+  .card {
+    break-inside: avoid;
+    margin: 0 0 3.2mm;
+    padding-bottom: 0.4mm;
+  }
+  .note { color: #3f3a33; }
+  .tag {
+    font-size: 7pt;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #1e3a5f;
+    font-weight: 650;
+  }
+  pre {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 7.5pt;
+    line-height: 1.28;
+    margin: 0.6mm 0 1.2mm;
+    padding: 1.4mm 1.8mm;
+    background: #f4f1ea;
+    border-left: 2px solid #1e3a5f;
+    white-space: pre-wrap;
+    break-inside: avoid;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.6mm 0 1.4mm;
+    break-inside: avoid;
+  }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.5mm 1.2mm 0.5mm 0;
+    border-bottom: 0.2mm solid #e4dfd4;
+  }
+  th {
+    font-size: 7pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #5c564c;
+    font-weight: 650;
+  }
+  code {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 0.92em;
+  }
+  ul { margin: 0.4mm 0 1.2mm; padding-left: 3.4mm; }
+  li { margin: 0 0 0.3mm; }
+  .warn {
+    border: 0.3mm solid #1e3a5f;
+    padding: 1.6mm 2mm 0.4mm;
+    margin-bottom: 3.2mm;
+    break-inside: avoid;
+  }
+  .warn h2 { margin-top: 0; }
+  .cast {
+    border: 0.3mm solid #1e3a5f;
+    padding: 1.5mm 2.2mm 0.6mm;
+    margin-bottom: 3mm;
+  }
+  .cast h2 { margin-top: 0; }
+  .cast-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3mm;
+  }
+  .cast pre { margin-bottom: 0.8mm; }
+</style>
+</head>
+<body>
+<header>
+  <p class="kicker">Algoritmia e Programação · teste de 11 de novembro de 2026</p>
+  <h1>Folha de consulta · Java</h1>
+  <p class="sub">Regras do teste e excertos das tuas fichas em <code>cesae_algoritmos/src</code>. Os fragmentos assumem o método <code>main</code> e <code>import java.util.Scanner;</code>.</p>
+</header>
+
+<section class="cast">
+  <h2>Cast entre int e double</h2>
+  <div class="cast-grid">
+    <div>
+      <p class="tag">int para double · automático</p>
+<pre>int x = 5;
+double y = x;
+System.out.println(y); // 5.0</pre>
+      <p>Não há perda, por isso o Java converte sozinho. A consola mostra <code>5.0</code>, com a parte decimal.</p>
+    </div>
+    <div>
+      <p class="tag">double para int · é preciso (int)</p>
+<pre>double preco = 9.99;
+// int n = preco;    não compila
+int n = (int) preco; // 9</pre>
+      <p>Perde a parte decimal, por isso o Java recusa. O cast corta, não arredonda: <code>9.99</code> fica <code>9</code>, não <code>10</code>.</p>
+    </div>
+    <div>
+      <p class="tag">O cast tem de ser antes da divisão</p>
+<pre>int a = 10, b = 3;
+double c = a / b;          // 3.0
+double d = (double) a / b; // 3.333…</pre>
+      <p><code>a / b</code> já é divisão de dois <code>int</code> e dá <code>3</code>. Guardar esse <code>3</code> num <code>double</code> só o transforma em <code>3.0</code>. <code>(double)(a / b)</code> também chega tarde.</p>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<section class="warn">
+  <h2>O que o teste costuma trocar</h2>
+  <table>
+    <tr><th>Código</th><th>Dá</th><th>Porquê</th></tr>
+    <tr><td><code>10 + 2 * 3</code></td><td>16</td><td><code>*</code> e <code>/</code> antes de <code>+</code> e <code>-</code></td></tr>
+    <tr><td><code>17 / 5</code></td><td>3</td><td>dois <code>int</code>: a parte decimal desaparece</td></tr>
+    <tr><td><code>17 / 5.0</code></td><td>3.4</td><td>basta um <code>double</code></td></tr>
+    <tr><td><code>14 % 4</code></td><td>2</td><td>resto. 14 = 3×4 + 2</td></tr>
+    <tr><td><code>a = 4; b = a++ * 2;</code></td><td>a=5, b=8</td><td><code>a++</code> usa 4 e só depois soma 1</td></tr>
+    <tr><td><code>"Total: " + 4 + 3</code></td><td>Total: 43</td><td>com texto à esquerda, <code>+</code> junta</td></tr>
+    <tr><td><code>1 + 2 + "3"</code></td><td>33</td><td>soma 1+2 primeiro; depois junta "3"</td></tr>
+    <tr><td><code>"1" + 2 + 3</code></td><td>123</td><td>já começa em texto: junta tudo</td></tr>
+  </table>
+  <ul>
+    <li><code>if</code> sem chavetas controla só a instrução seguinte. A identação não conta.</li>
+    <li><code>switch</code> sem <code>break</code> continua nos <code>case</code> de baixo.</li>
+    <li><code>while</code> testa antes: pode não correr. <code>do/while</code> testa no fim: corre pelo menos uma vez.</li>
+    <li><code>for (int i = 0; i &lt; 3; i++)</code> corre com 0, 1 e 2. O 3 já não entra.</li>
+    <li>Variável local sem valor: erro de compilação. Não fica 0 nem <code>null</code>.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>1. Variáveis e tipos</h2>
+  <table>
+    <tr><th>Tipo</th><th>Guarda</th><th>Exemplo</th></tr>
+    <tr><td><code>int</code></td><td>inteiro</td><td><code>int idade = 18;</code></td></tr>
+    <tr><td><code>double</code></td><td>real</td><td><code>double preco = 9.99;</code></td></tr>
+    <tr><td><code>char</code></td><td>um carácter, aspas simples</td><td><code>char letra = 'A';</code></td></tr>
+    <tr><td><code>String</code></td><td>texto, aspas duplas</td><td><code>String cidade = "Porto";</code></td></tr>
+    <tr><td><code>boolean</code></td><td><code>true</code> ou <code>false</code></td><td><code>boolean ok = true;</code></td></tr>
+  </table>
+  <p>Nome válido: letras, dígitos, <code>_</code>. Não começa por dígito, não tem espaço nem hífen, e não é palavra reservada (<code>class</code>, <code>int</code>, <code>final</code>, <code>if</code>…).</p>
+  <p><code>final</code> só recebe valor uma vez. A conversão entre <code>int</code> e <code>double</code> está na caixa do topo.</p>
+  <p class="tag">Teu exercício · FichaPratica01 / Ex06 · trocar dois valores</p>
+<pre>valor1 = valor2 + valor1;
+valor2 = valor1 - valor2;
+valor1 = valor1 - valor2;</pre>
+  <p class="note">Com auxiliar, que é o molde mais seguro: <code>aux = a; a = b; b = aux;</code></p>
+</section>
+
+<section class="card">
+  <h2>2. Operações</h2>
+  <p><code>+ - * / %</code> · atalhos <code>+= -= *= /= %=</code> · <code>++x</code> soma antes de usar, <code>x++</code> usa e só depois soma. O mesmo para <code>--</code>. Avalia-se da esquerda para a direita.</p>
+<pre>int a = 5;
+int b = ++a + a--;
+// ++a faz a=6 e vale 6
+// a-- vale 6 e depois a fica 5
+// b = 12. Consola: 5 12</pre>
+  <p class="tag">Teu exercício · FichaPratica01 / Ex08 · segundos para horas</p>
+<pre>horas    = total / 3600;
+minutos  = (total % 3600) / 60;
+segundos = total % 60;</pre>
+  <p class="note">Na tua Ficha 01 Ex02, <code>divisao = num1 / num2</code> com os dois <code>int</code> perde a parte decimal. Para a manter: <code>(double) num1 / num2</code>.</p>
+</section>
+
+<section class="card">
+  <h2>3. Consola</h2>
+  <p><code>print</code> fica na mesma linha. <code>println</code> muda de linha no fim.</p>
+  <table>
+    <tr><th>Chamada</th><th>Lê</th></tr>
+    <tr><td><code>input.nextInt()</code></td><td>um inteiro</td></tr>
+    <tr><td><code>input.nextDouble()</code></td><td>um real</td></tr>
+    <tr><td><code>input.next()</code></td><td>uma palavra, pára no espaço</td></tr>
+    <tr><td><code>input.nextLine()</code></td><td>a linha inteira</td></tr>
+    <tr><td><code>input.next().charAt(0)</code></td><td>o primeiro carácter</td></tr>
+  </table>
+  <p class="tag">Teu exercício · FichaPratica01 / Ex01</p>
+<pre>Scanner input = new Scanner(System.in);
+int num1, num2, soma;
+
+System.out.print("Insira o numero 1: ");
+num1 = input.nextInt();
+System.out.print("Insira o numero 2: ");
+num2 = input.nextInt();
+
+soma = num1 + num2;
+System.out.println("O resultado da soma é: " + soma);</pre>
+  <p class="note">Depois de um <code>nextInt()</code>, um <code>nextLine()</code> logo a seguir lê o Enter que ficou por consumir, e devolve uma linha vazia.</p>
+</section>
+
+<section class="card">
+  <h2>4. if / else</h2>
+  <p>Comparar: <code>== != &gt; &gt;= &lt; &lt;=</code>. Um <code>=</code> atribui, não compara. <code>&amp;&amp;</code> exige as duas. <code>||</code> basta uma. <code>!</code> inverte. Par: <code>n % 2 == 0</code>.</p>
+  <p class="tag">Teu exercício · FichaPratica02 / Ex01 · o maior</p>
+<pre>if (num1 == num2) {
+    System.out.println("Os números são iguais");
+} else if (num1 &gt; num2) {
+    maior = num1;
+} else {
+    maior = num2;
+}</pre>
+  <p class="tag">Teu exercício · FichaPratica02 / Ex03 · intervalos</p>
+<pre>if (salario &lt;= 15000)            taxa = 0.2;
+else if (salario &lt;= 20000)       taxa = 0.3;
+else if (salario &lt;= 25000)       taxa = 0.35;
+else                             taxa = 0.40;
+taxa_paga = salario * taxa;</pre>
+  <p class="note">Os limites encostam: 15000 entra no primeiro ramo por causa do <code>&lt;=</code>. Cada valor só entra num ramo.</p>
+  <p class="tag">Teu exercício · FichaPratica02 / Ex07</p>
+<pre>if (num1 % 2 == 0)
+    System.out.println("O número é par");
+else
+    System.out.println("O número é impar");</pre>
+  <p class="tag">Teu exercício · FichaPratica02 / Ex08</p>
+<pre>media = soma / (pesoNota1 + pesoNota2 + pesoNota3);
+if (media &gt; 9.5)
+    System.out.println("O aluno está aprovado.");
+else
+    System.out.println("O aluno está reprovado.");</pre>
+</section>
+
+<section class="card">
+  <h2>5. switch / case</h2>
+  <p>Serve para <code>int</code>, <code>char</code> e <code>String</code>. Não serve para <code>double</code>, <code>boolean</code> nem <code>long</code>. Sem <code>case</code> correspondente, corre o <code>default</code>. Se não houver <code>default</code>, não corre nada. <code>break</code> sai do <code>switch</code>.</p>
+  <p class="tag">Teu exercício · FichaPratica02 / Ex04 · lugar na corrida</p>
+<pre>switch (lugar) {
+    case 1: pontos = 10; break;
+    case 2: pontos = 8;  break;
+    case 3: pontos = 6;  break;
+    case 8: pontos = 1;  break;
+    default:
+        System.out.println("Não ganhou pontos");
+}
+if (pontos == 1)
+    System.out.println("Ganhou " + pontos + " ponto.");
+else if (pontos &gt; 0)
+    System.out.println("Ganhou " + pontos + " pontos.");</pre>
+  <p class="tag">Teu exercício · FichaPratica02 / Ex12 · menu</p>
+<pre>switch (opcao) {
+    case 1: System.out.println("Criar");      break;
+    case 2: System.out.println("Actualizar"); break;
+    case 3: System.out.println("Eliminar");   break;
+    case 4: System.out.println("Sair");       break;
+    default: System.out.println("Opção inválida!");
+}</pre>
+  <p class="note">Sem o <code>break</code> do <code>case 1</code>, uma opção 1 imprimiria também o texto do <code>case 2</code>. Vários <code>case</code> seguidos, sem código no meio, partilham o bloco de baixo.</p>
+</section>
+
+<section class="card">
+  <h2>6. while</h2>
+  <p>Testa a condição e, se for verdadeira, corre o corpo. Algures no corpo a condição tem de poder ficar falsa, senão o ciclo não acaba.</p>
+  <p class="tag">Teu exercício · FichaPratica03 / Ex01 · contar</p>
+<pre>int numero = 1;
+while (numero &lt;= 250) {
+    System.out.println(numero);
+    numero++;
+}</pre>
+  <p class="tag">Teu exercício · FichaPratica03 / Ex09 · ler até −1 e fazer a média</p>
+<pre>int num = 0, soma = 0, i = 0;
+while (num != -1) {
+    num = input.nextInt();
+    if (num &gt; -1) {
+        i++;
+        soma += num;
+    }
+}
+if (soma != 0) {
+    float media = (float) soma / i;
+    System.out.println("Média é: " + media);
+}</pre>
+  <p class="note">O <code>(float)</code> é obrigatório: <code>soma</code> e <code>i</code> são <code>int</code>, e sem o cast a divisão seria inteira. O −1 é lido, mas o <code>if</code> deixa-o fora da soma.</p>
+  <p class="tag">Molde · somar só os pares de 1 a 10</p>
+<pre>int n = 1, soma = 0;
+while (n &lt;= 10) {
+    if (n % 2 == 0) soma += n;
+    n++;
+}
+// soma = 2+4+6+8+10 = 30</pre>
+</section>
+
+<section class="card">
+  <h2>7. do / while</h2>
+  <p>Corre o corpo e só depois testa. Por isso executa pelo menos uma vez, mesmo que a condição já seja falsa. O <code>;</code> depois do <code>while</code> faz parte da sintaxe.</p>
+  <p class="tag">Teu exercício · FichaPratica04 / Ex05 · menu que repete</p>
+<pre>int opcao;
+do {
+    opcao = input.nextInt();
+    switch (opcao) {
+        case 1: System.out.println("Criar"); break;
+        case 2: System.out.println("Actualizar"); break;
+        case 3: System.out.println("Eliminar"); break;
+        case 4: System.out.println("Sair"); break;
+        default: System.out.println("Opção inválida!");
+    }
+} while (opcao != 4);</pre>
+<pre>int n = 5;
+do {
+    System.out.print(n);
+    n--;
+} while (n &gt; 5);
+// imprime 5 e pára: 4 &gt; 5 é falso</pre>
+</section>
+
+<section class="card">
+  <h2>8. for</h2>
+  <p>Ordem: inicialização, condição, atualização. A atualização corre no fim de cada volta, antes de voltar a testar.</p>
+  <p class="tag">Teu exercício · FichaPratica04 / Ex01 · de 10 a 20</p>
+<pre>for (int i = 10; i &lt; 21; i++)
+    System.out.println(i);</pre>
+  <p class="tag">Teu exercício · FichaPratica04 / Ex02 · ímpares e soma, passo 2</p>
+<pre>int soma = 0;
+for (int i = 11; i &lt; 52; i += 2) {
+    System.out.println(i);
+    soma += i;
+}</pre>
+  <p class="tag">Teu exercício · FichaPratica04 / Ex03 · divisores</p>
+<pre>for (int i = numero; i &gt; 0; i--) {
+    if (numero % i == 0)
+        System.out.print(i + " ");
+}</pre>
+  <p class="tag">Teu exercício · FichaPratica_ExtraCiclos / Ex04 · for dentro de for</p>
+<pre>for (int x = 0; x &lt; 4; x++) {
+    for (int i = 0; i &lt; 10; i++)
+        System.out.print("*");
+    System.out.println();
+}
+for (int x = 0; x &lt; 5; x++) {
+    for (int i = 0; i &lt;= x; i++)
+        System.out.print("*");
+    System.out.println();
+}</pre>
+  <p class="note">No segundo, cada linha tem mais um asterisco: 1, 2, 3, 4 e 5. O ciclo de dentro recomeça do zero em cada volta do de fora. A descida escreve-se <code>for (int i = 5; i &gt; 0; i--)</code>.</p>
+</section>
+
+<section class="card">
+  <h2>Onde está o resto</h2>
+  <table>
+    <tr><th>Pasta</th><th>O que treinaste</th></tr>
+    <tr><td>FichaPratica01</td><td>leitura, contas, área, média, troca, desconto, tempo</td></tr>
+    <tr><td>FichaPratica02</td><td><code>if</code>, intervalos, par, notas, <code>switch</code>, menu</td></tr>
+    <tr><td>FichaPratica03</td><td><code>while</code>, somas, intervalos, leitura até número negativo</td></tr>
+    <tr><td>FichaPratica04</td><td><code>for</code>, divisores, calculadora, menu com <code>do/while</code></td></tr>
+    <tr><td>FichaPratica_Condicionais</td><td><code>if</code> simples</td></tr>
+    <tr><td>FichaPratica_ExtraCiclos</td><td>ciclos uns dentro dos outros, figuras com <code>*</code></td></tr>
+  </table>
+  <p class="note">Código completo, sem cortes: <code>C:\Users\Bruno\Documents\GitHub\cesae_algoritmos\src</code></p>
+</section>
+
+</main>
+</body>
+</html>
