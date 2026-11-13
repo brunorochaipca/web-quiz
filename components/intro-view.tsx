@@ -68,8 +68,8 @@ export function IntroView({
           Teste modelo e treino de Java
         </h1>
         <p className="mt-4 max-w-2xl text-lg leading-7 text-foreground/80">
-          Questões de escolha múltipla para treinares antes do teste de 11 de
-          novembro de 2026. Há uma única resposta correta em cada questão.
+          Questões de escolha múltipla para treinares antes do teste. Há uma única
+          resposta correta em cada questão.
         </p>
       </header>
 
