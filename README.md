@@ -26,7 +26,7 @@ npm install
 npm run dev
 ```
 
-O repositório é privado. No outro computador, o Git pede início de sessão na conta `brunorochaipca` antes de clonar.
+O repositório é público, por isso não precisas de iniciar sessão para o clonar.
 
 Abre [http://localhost:3000](http://localhost:3000). Para parar o servidor, prime Ctrl+C.
 
